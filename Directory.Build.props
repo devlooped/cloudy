@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup Condition="'$(CI)' == ''">
+    <CI>false</CI>
+    <CI Condition="'$(TF_BUILD)' == 'true'">true</CI>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RootNamespace>Cloudy</RootNamespace>
+    <LangVersion>Preview</LangVersion>
+    <Nullable>Enable</Nullable>
+    <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
+    <InformationalVersion Condition="'$(TF_BUILD)' == 'true'">$(BUILD_BUILDNUMBER)-$(BUILD_BUILDID).$(BUILD_SOURCEBRANCHNAME).$(BUILD_SOURCEVERSION.Substring(0, 9))</InformationalVersion>
+  </PropertyGroup>
+
+</Project>
