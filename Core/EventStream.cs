@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Cloudy
 {
+    [ServiceEnvironment("Production")]
     class EventStream : IEventStream
     {
         readonly Uri gridUri;
@@ -40,7 +41,12 @@ namespace Cloudy
         Task PushAsync<TEvent>(TEvent e);
     }
 
-    interface IEventHandler<TEvent>
+    /// <summary>
+    /// Marker interface so that all handlers can be imported automatically without specifying the type of event.
+    /// </summary>
+    interface IEventHandler { }
+
+    interface IEventHandler<TEvent> : IEventHandler
     {
         /// <summary>
         /// Handles the event.

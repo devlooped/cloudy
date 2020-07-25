@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +27,14 @@ namespace Cloudy
             DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffK",
             Formatting = Formatting.Indented,
             NullValueHandling = NullValueHandling.Ignore,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+#if DEBUG
+            Error = (sender, args) => 
+            {
+                Trace.TraceError("{0}: {1}", args.ErrorContext.Path, args.ErrorContext.Error);
+                args.ErrorContext.Handled = true;
+            }
+#endif
         };
 
         public IDictionary<string, string> Deserialize(string data)

@@ -1,19 +1,21 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
 using System.Threading.Tasks;
 
 namespace Cloudy
 {
     class InboxHandler : IEventHandler<InboxArrived>
     {
+        readonly IEventStream events;
         readonly ILogger<InboxHandler> logger;
 
-        public InboxHandler(ILogger<InboxHandler> logger) => this.logger = logger;
+        public InboxHandler(IEventStream events, ILogger<InboxHandler> logger)
+            => (this.events, this.logger)
+            = (events, logger);
 
-        public Task HandleAsync(InboxArrived e)
+        public async Task HandleAsync(InboxArrived e)
         {
             logger.LogInformation("Inbox: {0}", e.Message);
-            return Task.CompletedTask;
+            await events.PushAsync(new MessageProcessed(e.Message));
         }
     }
 }

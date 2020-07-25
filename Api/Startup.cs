@@ -1,3 +1,5 @@
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Hosting;
@@ -30,6 +32,12 @@ namespace Cloudy
                 services.AddLogging(builder => builder.AddApplicationInsights(env.GetVariable("APPINSIGHTS_INSTRUMENTATIONKEY")));
                 services.AddApplicationInsightsTelemetry();
             }
+            else
+            {
+                // To satisfy direct dependencies on the client.
+                services.AddSingleton<TelemetryConfiguration>();
+                services.AddSingleton(x => new TelemetryClient(x.GetRequiredService<TelemetryConfiguration>()));
+            }
 
             if (env.IsDevelopment())
                 services.AddSingleton(CloudStorageAccount.DevelopmentStorageAccount);
@@ -55,6 +63,12 @@ namespace Cloudy
                     // Omit generated types for async state machines
                     !t.GetInterfaces().Any(i => i == typeof(IAsyncStateMachine)))
                 .Where(t => t.GetInterfaces().Length > 0 || t.GetCustomAttribute<ServiceLifetimeAttribute>() != null);
+
+            // Filter out services that don't target the current environment.
+            var environment = env.GetVariable("AZURE_FUNCTIONS_ENVIRONMENT", "Production");
+            candidateTypes = candidateTypes.Where(t =>
+                t.GetCustomAttribute<ServiceEnvironmentAttribute>() == null ||
+                environment.Equals(t.GetCustomAttribute<ServiceEnvironmentAttribute>()!.Environment, StringComparison.Ordinal));
 
             foreach (var implementationType in candidateTypes)
             {
