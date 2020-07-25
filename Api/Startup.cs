@@ -35,7 +35,7 @@ namespace Cloudy
             else
             {
                 // To satisfy direct dependencies on the client.
-                services.AddSingleton<TelemetryConfiguration>();
+                services.AddSingleton(_ => new TelemetryConfiguration(Guid.NewGuid().ToString("n")));
                 services.AddSingleton(x => new TelemetryClient(x.GetRequiredService<TelemetryConfiguration>()));
             }
 
