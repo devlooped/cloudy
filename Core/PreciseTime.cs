@@ -15,11 +15,6 @@ namespace Cloudy
         static readonly long startTicks = DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond * TimeSpan.TicksPerMillisecond;
 
         /// <summary>
-        /// Gets the elapsed time since the initial usage of <see cref="PreciseTime"/>.
-        /// </summary>
-        public static TimeSpan Uptime => TimeSpan.FromTicks(GetUtcNowTicks() - startTicks);
-
-        /// <summary>
         /// Gets the high-precision value of the current UTC date time, with 10.000.000ths of a 
         /// second precision (within the current process).
         /// </summary>

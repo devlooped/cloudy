@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Cloudy
 {
+    [ServiceEnvironment("Production")]
     class EventStream : IEventStream
     {
         readonly Uri gridUri;

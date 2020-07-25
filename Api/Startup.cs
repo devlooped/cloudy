@@ -1,12 +1,19 @@
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 [assembly: WebJobsStartup(typeof(Cloudy.Startup))]
 
@@ -15,20 +22,25 @@ namespace Cloudy
     public class Startup : IWebJobsStartup
     {
         public void Configure(IWebJobsBuilder builder)
-        {
-            Configure(builder?.Services ?? throw new ArgumentNullException(nameof(builder)), new Environment());
-        }
+            => Configure(builder?.Services ?? throw new ArgumentNullException(nameof(builder)), new Environment());
 
 #pragma warning disable CA1822 // Mark members as static. We'll need this for tests
         internal void Configure(IServiceCollection services, IEnvironment env)
         {
-            services.AddLogging(builder => builder.AddConsole());
+            services.AddSingleton<ActivityTelemetry>();
+            services.AddSingleton(services => services.GetRequiredService<ActivityTelemetry>().ActivitySource);
 
-            if (!env.IsDevelopment())
+            var aiKey = env.GetVariable("APPINSIGHTS_INSTRUMENTATIONKEY", "");
+            if (!string.IsNullOrEmpty(aiKey))
             {
                 //Add ApplicationInsights in production only
-                services.AddLogging(builder => builder.AddApplicationInsights(env.GetVariable("APPINSIGHTS_INSTRUMENTATIONKEY")));
-                services.AddApplicationInsightsTelemetry();
+                services.AddLogging(builder => builder.AddApplicationInsights(aiKey));
+                services.AddApplicationInsightsTelemetry(aiKey);
+            }
+            else
+            {
+                // To satisfy direct dependencies on the client.
+                services.AddSingleton<TelemetryClient>();
             }
 
             if (env.IsDevelopment())
@@ -55,6 +67,13 @@ namespace Cloudy
                     // Omit generated types for async state machines
                     !t.GetInterfaces().Any(i => i == typeof(IAsyncStateMachine)))
                 .Where(t => t.GetInterfaces().Length > 0 || t.GetCustomAttribute<ServiceLifetimeAttribute>() != null);
+
+            var environment = env.GetVariable("AZURE_FUNCTIONS_ENVIRONMENT", "Production");
+
+            // Filter out those that don't target the current environment
+            candidateTypes = candidateTypes.Where(t =>
+                t.GetCustomAttribute<ServiceEnvironmentAttribute>() == null ||
+                environment.Equals(t.GetCustomAttribute<ServiceEnvironmentAttribute>()!.Environment, StringComparison.Ordinal));
 
             foreach (var implementationType in candidateTypes)
             {

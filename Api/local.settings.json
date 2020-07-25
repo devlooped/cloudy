@@ -2,6 +2,6 @@
   "IsEncrypted": false,
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-  },
-  "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "EventGridUrl": "http://localhost:7071/runtime/webhooks/eventgrid?functionName=event-handle"
+  }
 }

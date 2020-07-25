@@ -26,6 +26,8 @@ namespace Cloudy
             DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffK",
             Formatting = Formatting.Indented,
             NullValueHandling = NullValueHandling.Ignore,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            Error = (sender, args) => args.ErrorContext.Handled = true,
         };
 
         public IDictionary<string, string> Deserialize(string data)

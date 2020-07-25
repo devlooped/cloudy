@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <None Update="tests.settings.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\Api\secrets.settings.json" Link="secrets.settings.json" CopyToOutputDirectory="PreserveNewest" />
     <UpToDateCheckInput Include="@(Content);@(None)" />
   </ItemGroup>
 
