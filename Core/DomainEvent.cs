@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace Cloudy
 {
-    [SkipServiceScan]
+    [SkipServiceConvention]
     public abstract class DomainEvent : IEventMetadata
     {
         DateTime eventTime = PreciseTime.UtcNow;

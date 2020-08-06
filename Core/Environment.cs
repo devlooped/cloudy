@@ -6,13 +6,13 @@ using Microsoft.Extensions.Configuration;
 namespace Cloudy
 {
     /// <summary>
-    /// The <see cref="SkipServiceScanAttribute"/> is used here so that the default 
+    /// The <see cref="SkipServiceConventionAttribute"/> is used here so that the default 
     /// convention of exporting to the DI container everything that implements 
     /// an interface doesn't apply to this class, since it's instantiated 
     /// explicitly from Startup so that we can access its variables during 
     /// initial bootstrapping.
     /// </summary>
-    [SkipServiceScan]
+    [SkipServiceConvention]
     class Environment : IEnvironment
     {
         static IConfiguration config;
