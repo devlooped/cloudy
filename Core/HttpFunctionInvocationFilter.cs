@@ -42,7 +42,10 @@ namespace Cloudy
             var http = accessor.HttpContext;
             var feature = http.Features.Where(kv => kv.Key.Name == "IFunctionExecutionFeature")
                 .Select(kv => kv.Value.AsDynamicReflection())
-                .First();
+                .FirstOrDefault();
+
+            if (feature == null)
+                return;
 
             dynamic descriptor = feature.Descriptor;
 
